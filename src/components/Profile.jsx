@@ -1,16 +1,24 @@
 import React from 'react'
 import { Modal,Button } from 'flowbite-react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios';
+import { BASE_URL } from '../App';
 const Profile = ({profile,handleProfile,handleUserAuth}) => {
     const user= JSON.parse(localStorage.getItem('user'))
     const navigate=useNavigate();
 
-    const logout=()=>{
+    const logout=async()=>{
+      try{
+        await axios.delete(`${BASE_URL}/logout`, { headers: { Authorization: `Token ${user.token}`}})
         localStorage.removeItem('user');
         handleUserAuth("");
         navigate('/login')
-
+      }catch (err){
+        console.log(err)
+      }
     }
+
+   
   return (
     <>
      <Modal show={profile} onClose={() => handleProfile(false)}>

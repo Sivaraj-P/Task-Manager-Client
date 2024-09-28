@@ -24,6 +24,9 @@ const Tasks = ({handleUserAuth}) => {
   const [showProfile,setProfile]=useState(false);
   const [showUsers,setShowUsers]=useState(false);
   const [searchTerm, setSearchTerm] = useState(''); 
+  const [nextPage, setNextPage] = useState(null);
+  const [previousPage, setPreviousPage] = useState(null);
+
 
 
 
@@ -35,10 +38,12 @@ const Tasks = ({handleUserAuth}) => {
   const handleUsers=(value)=>{
     setShowUsers(value)
   }
-  const fetchTasks = async () => {
+  const fetchTasks = async (url=`${BASE_URL}/tasks`) => {
     try {
-      const response = await axios.get(`${BASE_URL}/tasks`, { headers: { Authorization: `Token ${user.token}` } });
-      setTasks(response.data);
+      const response = await axios.get(url, { headers: { Authorization: `Token ${user.token}` } });
+      setTasks(response.data.results);
+      setNextPage(response.data.next);
+      setPreviousPage(response.data.previous);
     } catch (error) {
       console.error('Error fetching tasks:', error);
     }
@@ -341,6 +346,18 @@ console.log(newTask)
           onChange={(e) => setSearchTerm(e.target.value)} 
           className="mb-4 w-full border-gray-400" 
         />
+        <div className="w-full flex justify-end gap-2 m-2">
+          {previousPage && (
+            <Button color="grey" onClick={() => fetchTasks(previousPage)}>
+              Previous
+            </Button>
+          )}
+          {nextPage && (
+            <Button color="grey" onClick={() => fetchTasks(nextPage)}>
+              Next
+            </Button>
+          )}
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full bg-white border border-gray-300 rounded-lg">
             <thead>
@@ -367,7 +384,7 @@ console.log(newTask)
                       onChange={() => handleCheckboxChange(task.id, !task.status)} 
                     />
                   </td>
-                  <td className="p-4 text-center">{ task.due_date}</td>
+                  <td className="p-4 text-center">{ task.due_date.split(" ")[0]}</td>
                   <td className="p-4 text-center">{task.title}</td>
               
                   <td className="p-4 flex space-x-2 justify-center items-center">
